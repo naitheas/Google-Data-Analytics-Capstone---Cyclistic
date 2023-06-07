@@ -1,4 +1,3 @@
-
 DROP TABLE IF EXISTS #qtr_1;
 DROP TABLE IF EXISTS #qtr_2;
 DROP TABLE IF EXISTS #qtr_3;
@@ -8,11 +7,11 @@ DROP TABLE IF EXISTS #year_data;
 CREATE TABLE #qtr_1 (
 ride_id VARCHAR(100) PRIMARY KEY,
 rideable_type VARCHAR(100),
-started_at SMALLDATETIME,
-ended_at SMALLDATETIME,
-ride_length TIME,
+started_at DATETIME,
+ended_at DATETIME,
+ride_length DATETIME,
 day_of_week VARCHAR(100),
-ride_date DATE,
+ride_date DATETIME,
 ride_month VARCHAR(100),
 start_station_name VARCHAR(200),
 start_station_id VARCHAR(100),
@@ -33,11 +32,11 @@ member_casual VARCHAR(100)
 CREATE TABLE #qtr_2 (
 ride_id VARCHAR(100) PRIMARY KEY,
 rideable_type VARCHAR(100),
-started_at SMALLDATETIME,
-ended_at SMALLDATETIME,
-ride_length TIME,
+started_at DATETIME,
+ended_at DATETIME,
+ride_length DATETIME,
 day_of_week VARCHAR(100),
-ride_date DATE,
+ride_date DATETIME,
 ride_month VARCHAR(100),
 start_station_name VARCHAR(200),
 start_station_id VARCHAR(100),
@@ -58,11 +57,11 @@ member_casual VARCHAR(100)
 CREATE TABLE #qtr_3 (
 ride_id VARCHAR(100) PRIMARY KEY,
 rideable_type VARCHAR(100),
-started_at SMALLDATETIME,
-ended_at SMALLDATETIME,
-ride_length TIME,
+started_at DATETIME,
+ended_at DATETIME,
+ride_length DATETIME,
 day_of_week VARCHAR(100),
-ride_date DATE,
+ride_date DATETIME,
 ride_month VARCHAR(100),
 start_station_name VARCHAR(200),
 start_station_id VARCHAR(100),
@@ -80,14 +79,15 @@ ride_distance_in_km FLOAT,
 ride_distance_in_mi FLOAT,
 member_casual VARCHAR(100)
 );
+
 CREATE TABLE #qtr_4 (
 ride_id VARCHAR(100) PRIMARY KEY,
 rideable_type VARCHAR(100),
-started_at SMALLDATETIME,
-ended_at SMALLDATETIME,
-ride_length TIME,
+started_at DATETIME,
+ended_at DATETIME,
+ride_length DATETIME,
 day_of_week VARCHAR(100),
-ride_date DATE,
+ride_date DATETIME,
 ride_month VARCHAR(100),
 start_station_name VARCHAR(200),
 start_station_id VARCHAR(100),
@@ -105,14 +105,15 @@ ride_distance_in_km FLOAT,
 ride_distance_in_mi FLOAT,
 member_casual VARCHAR(100)
 );
+
 CREATE TABLE #year_data (
 ride_id VARCHAR(100) PRIMARY KEY,
 rideable_type VARCHAR(100),
-started_at SMALLDATETIME,
-ended_at SMALLDATETIME,
-ride_length TIME,
+started_at DATETIME,
+ended_at DATETIME,
+ride_length DATETIME,
 day_of_week VARCHAR(100),
-ride_date DATE,
+ride_date DATETIME,
 ride_month VARCHAR(100),
 start_station_name VARCHAR(200),
 start_station_id VARCHAR(100),
@@ -128,9 +129,8 @@ end_lng FLOAT,
 end_rad_lng FLOAT,
 ride_distance_in_km FLOAT,
 ride_distance_in_mi FLOAT,
-member_casual VARCHAR(100),
+member_casual VARCHAR(100)
 );
-
 
 INSERT
   INTO  #qtr_1 
@@ -141,8 +141,7 @@ SELECT *
 FROM [Cyclistic Capstone]..['202202-divvy-tripdata$']
 UNION
 SELECT *
-FROM [Cyclistic Capstone]..['202203-divvy-tripdata$']
-;
+FROM [Cyclistic Capstone]..['202203-divvy-tripdata$'];
 
 INSERT
   INTO  #qtr_2
@@ -153,8 +152,7 @@ SELECT *
 FROM [Cyclistic Capstone]..['202205-divvy-tripdata$']
 UNION
 SELECT *
-FROM [Cyclistic Capstone]..['202206-divvy-tripdata$']
-;
+FROM [Cyclistic Capstone]..['202206-divvy-tripdata$'];
 
 INSERT
   INTO  #qtr_3 
@@ -165,8 +163,7 @@ SELECT *
 FROM [Cyclistic Capstone]..['202208-divvy-tripdata$']
 UNION
 SELECT *
-FROM [Cyclistic Capstone]..['202209-divvy-tripdata$']
-;
+FROM [Cyclistic Capstone]..['202209-divvy-tripdata$'];
 
 INSERT
   INTO  #qtr_4
@@ -177,8 +174,7 @@ SELECT *
 FROM [Cyclistic Capstone]..['202211-divvy-tripdata$']
 UNION
 SELECT *
-FROM [Cyclistic Capstone]..['202212-divvy-tripdata$']
-;
+FROM [Cyclistic Capstone]..['202212-divvy-tripdata$'];
 
 INSERT
   INTO  #year_data
@@ -192,31 +188,14 @@ SELECT *
 FROM #qtr_3
 UNION
 SELECT *
-FROM #qtr_4
-;
+FROM #qtr_4;
 
---- QUERIES BY YEAR
+---                     QUERIES BY YEAR
 --Query to determine average distance traveled by member type for year 2022
 SELECT member_casual,AVG(ride_distance_in_mi) AS avg_ride_distance
 FROM #year_data
 GROUP BY member_casual
 ORDER BY avg_ride_distance DESC;
-
---Query to determine average ride time per member type for year 2022
-SELECT member_casual, CASE
-WHEN member_casual = 'member' THEN (SELECT CAST( AVG(CAST(CAST(ride_length as DateTime) as Float)) as DateTime))
-WHEN member_casual = 'casual' THEN (SELECT CAST( AVG(CAST(CAST(ride_length as DateTime) as Float)) as DateTime))
-END AS average_trip_duration_all_year
-FROM #year_data
-GROUP BY member_casual;
-
---Query total rides taken for year 2022
-SELECT COUNT(started_at) AS total_rides
-FROM #year_data;
-
-SELECT member_casual, COUNT(started_at) AS total_rides
-FROM #year_data
-GROUP BY member_casual;
 
 --Query rides per day of week for year 2022 in descending order
 SELECT day_of_week,COUNT(day_of_week) AS day_count
@@ -231,20 +210,20 @@ FROM #year_data
 GROUP BY ride_month
 ORDER BY ride_count DESC;
 
---Query total trips by member type per day of week for year 2022 in descending order
+--Query highest travel days by day of week in descending order
 SELECT day_of_week,
 COUNT(started_at) AS TotalTrips,
 SUM(CASE WHEN member_casual = 'member' THEN 1 ELSE 0 END) AS MemberTrips,
 SUM(CASE WHEN member_casual = 'casual' THEN 1 ELSE 0 END) AS CasualTrips
-FROM #qtr_1
+FROM #year_data
 GROUP BY day_of_week
 ORDER BY TotalTrips DESC;
 
---Query total trips by member type for year 2022
+--Query total trips for year and member types in descending order
 SELECT COUNT(started_at) AS TotalTrips,
 SUM(CASE WHEN member_casual = 'member' THEN 1 ELSE 0 END) AS MemberTrips,
 SUM(CASE WHEN member_casual = 'casual' THEN 1 ELSE 0 END) AS CasualTrips
-FROM #qtr_1;
+FROM #year_data;
 
 --Temp table to hold altered data type to determine percentage of total rides per member group
 WITH member_data AS
@@ -257,8 +236,13 @@ END AS percentage_of_total_rides_all_year
 FROM #year_data, member_data
 GROUP BY member_casual, member_data.total_num;
 
+--Query average duration for year by member type in descending order
+SELECT member_casual, AVG(datediff(minute, started_at, ended_at)) AS AverageTime
+FROM #year_data
+GROUP BY member_casual
+ORDER BY AverageTime DESC;
 
---QUERIES BY QUARTER
+--                  QUERIES BY QUARTER
 --Temp table to determine percentage of total rides per member group per quarters
 --Quarter 1
 WITH member_data AS
@@ -280,6 +264,7 @@ WHEN member_casual = 'casual' THEN ROUND(CAST((COUNT(*) / total_num) * 100 AS NU
 END AS percentage_of_total_rides_qtr2
 FROM #qtr_2, member_data
 GROUP BY member_casual, member_data.total_num;
+
 --Quarter 3
 WITH member_data AS
 (SELECT CAST (COUNT(started_at) AS FLOAT) AS total_num
@@ -300,4 +285,27 @@ WHEN member_casual = 'casual' THEN ROUND(CAST((COUNT(*) / total_num) * 100 AS NU
 END AS percentage_of_total_rides_qtr4
 FROM #qtr_4, member_data
 GROUP BY member_casual, member_data.total_num;
+
+
+----Query average duration for each quarter by member type in descending order
+--Quarter 1
+SELECT member_casual, AVG(datediff(minute, started_at, ended_at)) AS AverageTime
+FROM #qtr_1
+GROUP BY member_casual
+ORDER BY AverageTime DESC;
+--Quarter 2
+SELECT member_casual, AVG(datediff(minute, started_at, ended_at)) AS AverageTime
+FROM #qtr_2
+GROUP BY member_casual
+ORDER BY AverageTime DESC;
+--Quarter 3
+SELECT member_casual, AVG(datediff(minute, started_at, ended_at)) AS AverageTime
+FROM #qtr_3
+GROUP BY member_casual
+ORDER BY AverageTime DESC;
+--Quarter 4
+SELECT member_casual, AVG(datediff(minute, started_at, ended_at)) AS AverageTime
+FROM #qtr_4
+GROUP BY member_casual
+ORDER BY AverageTime DESC;
 
